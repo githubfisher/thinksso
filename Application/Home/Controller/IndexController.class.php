@@ -6,6 +6,6 @@ use Think\Controller;
 class IndexController extends Controller {
 	public function index()
 	{
-		$this->redirect('Login/index');
+		$this->redirect('Server/index');
 	}
 }
