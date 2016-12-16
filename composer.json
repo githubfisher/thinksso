@@ -1,14 +1,12 @@
 {
-    "name": "topthink/thinkphp",
-    "description": "the ThinkPHP Framework",
-    "type": "framework",
-    "keywords": ["framework","thinkphp","ORM"],
-    "homepage": "http://thinkphp.cn/",
-    "license": "Apache2",
+    "name": "githubfisher/thinksso",
+    "description": "thinkphp user center",
+    "keywords": ["SSO","thinkphp","usercenter"],
+    "license": "MIT",
     "authors": [
         {
-            "name": "liu21st",
-            "email": "liu21st@gmail.com"
+            "name": "githubfisher",
+            "email": "gooodfisher@126.com"
         }
     ],
     "require": {
