@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Material Design风格用户注册登录界面设计 </title>
+	<!-- <link rel="stylesheet" type="text/css" href="css/normalize.css" /> -->
+	<link rel="stylesheet" href="__PUBLIC__/css/default.css" type="text/css">
+	<link rel="stylesheet" href="__PUBLIC__/css/materialize.min.css">
+	<link rel="stylesheet" href="__PUBLIC__/css/grid.css">
+	<style type="text/css">
+	html,
+	body {
+	    height: 100%;
+	}
+	html {
+	    display: table;
+	    margin: auto;
+	}
+	body {
+	    display: table-cell;
+	    vertical-align: middle;
+	}
+	.margin {
+	  margin: 0 !important;
+	}
+	</style>
+	<!--[if IE]>
+		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
+	<![endif]-->
+	<script>
+		var timer;
+		function send_code(){
+			$("#get-code").hide();
+			$("#resend").show();
+			timer = setInterval(clock,1000);
+		}
+		function clock(){
+			var time = document.getElementById("re-send").innerText;
+			var now = time-1;
+			if(now >= 0){
+				document.getElementById("re-send").innerText = now;
+			}else{
+				clearInterval(timer);
+				document.getElementById("re-send").innerText = 120;
+				$("#resend").hide();
+				$("#get-code").show();
+			}
+		}
+	</script>
+</head>
+<body class="green">
+	<div id="login-page" class="row">
+	    <div class="col s12 z-depth-6 card-panel">
+	      <form class="login-form">
+	        <div class="row">
+	          <div class="input-field col s12 center">
+	            <img src="__PUBLIC__/img/logo.png" alt="" class="responsive-img valign profile-image-login index-icon">
+	            <p class="center login-form-text">Material Design 用户登录系统</p>
+	             
+	          </div>
+	        </div>
+	        <div class="row margin">
+	          <div class="input-field col s12">
+	            <i class="mdi-social-mobile-outline prefix"></i>
+	            <input class="validate" id="email" type="email">
+	            <label for="email" data-error="wrong" data-success="right" class="">手机号码</label> <!-- center-align -->
+	            <button type="button" class="get-code" id="get-code" onclick="send_code();">获取验证码</button>
+	            <button type="button" class="resend" id="resend" style="display:none;"><span id="re-send">120</span>秒后重新发送</button>
+	          </div>
+	        </div>
+	        <div class="row margin">
+	          <div class="input-field col s12">
+	            <i class="mdi-social-code-outline prefix"></i>
+	            <input class="validate" id="email" type="email">
+	            <label for="email" data-error="wrong" data-success="right" class="">验证码</label> <!-- center-align -->
+	          </div>
+	        </div>
+	        <div class="row mobile-register">
+	          <div class="input-field col s12">
+	            <a href="forgot-password.html" class="btn waves-effect waves-light col s12">登　录</a>
+	          </div>
+	        </div>
+	        <div class="rows">
+	          <div class="input-field col s6 m6 l6">
+	          	<p class="margin medium-small"><a href="{:U('Home/Server/register')}">现在注册!</a></p>
+	          </div>
+	          <div class="input-field col s6 m6 l6">
+	            <p class="margin right-align medium-small"><a href="{:U('Home/Server/index')}">传统登录</a></p>
+	          </div>          
+	        </div>
+	        <div class="row group">
+			 <div class="tagline"><span>第三方登录</span></div><!-- .tagline -->
+			</div>
+			<div class="row group">
+			  <div class="col span_12_of_12 center">
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/weixin.png"></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/68-sina-weibo.png" ></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/taobao.png" ></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/qq.png" ></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/didi.png" ></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/baidu.png" ></a>
+				<a href="#"><img class="third-icon" src="__PUBLIC__/img/dianping.png" ></a>
+			  </div>
+			</div>
+	      </form>
+	    </div>
+	  </div>
+	<script type="text/javascript" src="__PUBLIC__/js/jquery-1.11.0.min.js"></script>
+ 	<script type="text/javascript" src="__PUBLIC__/js/materialize.min.js"></script>
+</body>
+</html>
