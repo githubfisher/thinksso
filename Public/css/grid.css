@@ -106,6 +106,10 @@
 	font-size: 1rem;
 	color: red;
 }
+/* tip msg */
+.tip-success{
+	background-image: url(../img/swal2-success.png) center left no-repeat;
+}
 /* new adding END*/
 /*  SECTIONS  */
 .row {
