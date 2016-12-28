@@ -28,6 +28,7 @@ class Server
 		// check Signature
 		if(!$this->checkSignature($request)){
 			$this->toLogin($callback,$appId);
+			return;
 		}
 		$ticket = $this->getTicket();
 		if(isset($ticket['id'])){
@@ -55,12 +56,12 @@ class Server
 	private function checkSignature($request)
 	{
 		if($clientInfo = $this->getClientInfo($request['appId'])){
-			if($this->getSign($clientInfo['token'],$request['nonce'],$request['timestamp']) == $request['signature'])
+			$sign = $this->getSign($request['nonce'],$request['timestamp'],$clientInfo['token']);
+			if($sign == $request['signature']){
 				return true;
-			return false;
-		}else{
-			return false;
+			}
 		}
+		return false;
 	}
 
 	/*
@@ -78,14 +79,33 @@ class Server
 	}
 
 	/*
+	 * make Server signature
+	 * @return array
+	 */
+	public function makeSignature()
+	{
+		$nonce = $this->getRand();
+		$timestamp = (string)time();
+		$token = $this->_config['token'];
+		$signature = $this->getSign($nonce,$timestamp,$token);
+		$array = array(
+			'signature' => $signature,
+			'nonce' => $nonce,
+			'timestamp' => $timestamp
+		);
+		return $array;
+	}
+
+	/*
 	 * get encrypt signature
 	 * @return string
 	 */
 	private function getSign($nonce,$timestamp,$token)
 	{
 		$array = array($nonce,$timestamp,$token);
-		sort($array);
-		$sign = sha1(implode($array));
+		sort($array,SORT_NUMERIC);
+		$sign = implode($array);
+		$sign = sha1($sign);
 		return $sign;
 	}
 
@@ -184,9 +204,18 @@ class Server
 	private function toClientLogin($callback,$appId)
 	{
 		$ticketInfo = $this->getTicketInfo();
-		$clientInfo = $this->getClientInfo($appId);
-		$url = $clientInfo['loginUrl'].$this->signature().$ticketInfo.'&callback='.$callback;
+		$url = $this->getClientLoginUrl($appId).$this->signature().$ticketInfo.'&callback='.$callback;
 		header('Location:'.$url);
+	}
+
+	/*
+	 * get Client's Login Url
+	 * @return string
+	 */
+	public function getClientLoginUrl($appId)
+	{
+		$clientInfo = $this->getClientInfo($appId);
+		return $clientInfo['loginUrl'];
 	}
 
 	/*
@@ -221,15 +250,7 @@ class Server
 	public function login($userInfo,$callback,$appId)
 	{
 		if($userInfo){
-			$userInfo = $this->encrypt(json_encode($userInfo));
-			$ticket = array(
-				'id' => $this->getRand(),
-				'create_at' => time(),
-				'check_at' => time(),
-				'expire_time' => $this->_config['expire_time'],
-				'user' => $userInfo,
-				'clients' => array($appId)
-			);
+			$ticket = $this->makeTicket($userInfo);
 			$this->setTicket(false,$ticket);
 			$this->toClientLogin($callback,$appId);
 		}else{
@@ -239,17 +260,30 @@ class Server
 	}
 
 	/*
+	 * make ticket 
+	 * @return array
+	 */
+	public function makeTicket($userInfo)
+	{
+		$ticket = array(
+			'id' => $this->getRand(),
+			'create_at' => time(),
+			'check_at' => time(),
+			'expire_time' => $this->_config['expire_time'],
+			'user' => $this->encrypt(json_encode($userInfo))
+		);
+		return $ticket;
+	}
+
+	/*
 	 * set ticket 
 	 * @return none
 	 */
-	private function setTicket($type=false,$ticket,$appId)
+	public function setTicket($type=false,$ticket,$appId)
 	{
 		$name = $this->_config['ticketName'];
 
 		if($type){
-			// add client info to old ticket
-			if(!array_search($appId,$ticket['clients']))
-				$ticket['clients'][] = $appId;
 			$ticket['check_at'] = time();
 			setcookie($name,$ticket);
 			$_SESSION[$name] = $ticket;
@@ -265,7 +299,6 @@ class Server
 				setcookie($name.'[\'clients\']['.$i.']',$client,time()+$expire_time);
 				$i++;
 			}
-			setcookie($name."['user']",$ticket['user']); //debug
 			$_SESSION[$name] = $ticket;
 		}
 	}

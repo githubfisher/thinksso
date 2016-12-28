@@ -24,10 +24,94 @@
 	.margin {
 	  margin: 0 !important;
 	}
+	#tip-img{
+		width:5rem;
+		height:5rem;
+	}
+	.tip{
+		display: none;
+	}
+	.tip-failed{
+		display:none;
+	}
+	.tip a{
+		margin-top: 0.8rem;
+		margin-bottom: 1rem;
+	}
 	</style>
 	<!--[if IE]>
 		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
 	<![endif]-->
+	<script>
+		function msg(type,msg){
+			document.getElementById("msg").innerText = msg;
+			if(type == 1){
+				$(".msg").show();
+			}else{
+				$(".msg").hide();
+			}
+		}
+		function reset_pwd()
+		{
+			var result = check_psd();
+			if(!result){
+				return false;
+			}
+			result = check_pwd();
+			if(!result){
+				return false;
+			}
+			var name = document.getElementById("name").value;
+			var pwd = document.getElementById("password1").value;
+			alert(name+","+pwd);
+			$.post("reset_pwd",{name,pwd},function(data){
+				if(data.status == 1){
+					$(".reg-form").hide();
+					$("#tip-img").attr("src",'/Public/img/swal2-success2.png');
+					document.getElementById("tip-msg").innerText = '密码重置成功';
+					$(".tip").show();
+				}else{
+					$(".reg-form").hide();
+					document.getElementById("tip-msg").innerText = '密码重置失败';
+					$("#tip-img").attr("src",'/Public/img/swal2-error.png');
+					$(".tip-success").hide();
+					$(".tip-failed").show();
+					$(".tip").show();
+				}
+			});
+		}
+		function check_pwd(){
+			var pwd1 = document.getElementById("password1").value;
+			var pwd2 = document.getElementById("password2").value;
+			if(pwd1 != pwd2){
+				msg(1,'两次输入不一致');
+				return false;
+			}else{
+				msg(2,'');
+				return true;
+			}
+		}
+		function check_psd(){
+			var pwd1 = document.getElementById("password1").value;
+			var pwd2 = document.getElementById("password2").value;
+			if(pwd1 == '' || pwd2 == ''){
+				msg(1,'密码不能为空');
+				return false;
+			}else if(pwd1.length < 6 || pwd2.length < 6){
+				msg(1,'密码至少6位');
+				return false;
+			}
+			return true;
+		}
+		function back(){
+			$(".reg-form").show();
+			$(".msg").hide();
+			$(".tip").hide();
+		}
+		function toLogin(appId,callback){
+			window.location.href="/index.php/Home/server/index?appId="+appId+'&callback='+callback;;
+		}
+	</script>
 </head>
 <body class="red">
   <div id="login-page" class="row">
@@ -40,43 +124,42 @@
           
           </div>
 	    </div>
-	    <div class="row margin">
+	    <div class="row margin reg-form">
           <div class="input-field col s12">
             <i class="mdi-action-lock-outline prefix"></i>
-            <input id="password" type="password">
-            <label for="password">新密码</label>
+            <input id="password1" type="password">
+            <label for="password1">新密码</label>
           </div>
         </div>
-        <div class="row margin">
+        <div class="row margin reg-form">
           <div class="input-field col s12">
             <i class="mdi-action-lock-outline prefix"></i>
-            <input id="password" type="password">
-            <label for="password">再次确认</label>
+            <input id="password2" type="password">
+            <label for="password2">再次确认</label>
           </div>
         </div>
-        <!-- <div class="row">          
+        <div class="row msg reg-form">          
           <div class="input-field col s12 m12 l12  login-text">
-              <input type="checkbox" id="remember-me" />
-              <label for="remember-me">记住我</label>
-          </div>
-        </div> -->
-        <div class="row">
-          <div class="input-field col s12">
-            <a href="index.html" class="btn waves-effect waves-light col s12">重　置</a>
+            <span id="msg"></span>
           </div>
         </div>
-        <div class="rows">
+        <div class="row reg-form">
+          <div class="input-field col s12">
+            <a href="javascript:void(0);" class="btn waves-effect waves-light col s12" id="reset_pwd" onclick="reset_pwd();">重　置</a>
+          </div>
+        </div>
+        <div class="rows reg-form">
           <div class="input-field col s6 m6 l6">
-            <p class="margin medium-small"><a href="{:U('Home/Server/register')}">现在注册!</a></p>
+            <p class="margin medium-small"><a href="{:U('Home/Server/register')}?appId={$appId}&callback={$callback}">现在注册!</a></p>
           </div>
           <div class="input-field col s6 m6 l6">
-            <p class="margin right-align medium-small"><a href="{:U('Home/Server/fast_login')}">快捷登录</a></p>
+            <p class="margin right-align medium-small"><a href="{:U('Home/Server/index')}?appId={$appId}&callback={$callback}">登录</a></p>
           </div>          
         </div>
-        <div class="row group">
+        <div class="row group reg-form">
 			 <div class="tagline"><span>第三方登录</span></div><!-- .tagline -->
 		</div>
-		<div class="row group">
+		<div class="row group reg-form">
 		  <div class="col span_12_of_12 center">
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/weixin.png"></a>
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/68-sina-weibo.png" ></a>
@@ -85,6 +168,15 @@
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/didi.png" ></a>
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/baidu.png" ></a>
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/dianping.png" ></a>
+		  </div>
+		</div>
+		<input type="hidden" id="name" name="name" value="{$name}">
+		<div class="row tip">
+		  <div class="input-field col s12 center">
+	        <img src="__PUBLIC__/img/swal2-success2.png" id="tip-img">
+	        <h4 id="tip-msg"></h4>
+	        <a href="javascript:void(0);" class="btn waves-effect waves-light col s12 tip-success" onclick="toLogin('{$appId}','{$callback}');">去登录</a>
+	        <a href="javascript:void(0);" class="btn waves-effect waves-light col s12 tip-failed" onclick="back();">返回</a>
 		  </div>
 		</div>
 	  </form>

@@ -24,28 +24,221 @@
 	.margin {
 	  margin: 0 !important;
 	}
+	#tip-img{
+		width:5rem;
+		height:5rem;
+	}
+	#tip-msg{
+		margin-bottom: 1.2em;
+	}
+	.tip{
+		display: none;
+	}
+	.tip-failed{
+		display:none;
+	}
+	.tip a{
+		margin-top: 0;
+		margin-bottom: 1rem;
+	}
 	</style>
 	<!--[if IE]>
 		<script src="http://libs.useso.com/js/html5shiv/3.7/html5shiv.min.js"></script>
 	<![endif]-->
 	<script>
-		function login(){
-			$(".login-form").submit();
+		var timer;
+		var sec = 120;
+		var low = 119;
+		function msg(type,msg){
+			document.getElementById("msg").innerText = msg;
+			if(type == 1){
+				$(".msg").show();
+			}else{
+				$(".msg").hide();
+			}
 		}
-		function submit(){
-			document.getElementById("msg").innerText = '';
+		function fast_login(){
+			msg(2,'');
+			$(".fast-form").show();
+			$(".common-form").hide();
+		}
+		function common_login(){
+			msg(2,'');
+			$(".fast-form").hide();
+			$(".common-form").show();
+		}
+		function send_code(){
 			$(".msg").hide();
+			var mobile = document.getElementById("mobile").value;
+			if(mobile == ''){
+				msg(1,'手机号不能为空！');
+				return true;
+			}else if(!(/^1(3|4|5|7|8)\d{9}$/.test(mobile))){
+				msg(1,'请填写正确的手机号！');
+				return true;
+			}
+			document.getElementById("re-send").innerText = '发送成功';
+			timer = setInterval(clock,1000);
+			$("#get-code").hide();
+			$("#resend").show();
+			// $.post("send_msg",{mobile},function(data){
+			// 	if(data.status == 1){
+			// 		document.getElementById("re-send").innerText = '发送成功';
+			// 		return true;
+			// 	}else{
+			// 		clearInterval(timer);
+			// 		sec = 120;
+			// 		$("#resend").hide();
+			// 		$("#get-code").show();
+			// 		return false;
+			// 	}
+			// });
+		}
+		function clock(){
+			sec--;
+			if(sec>low){
+				document.getElementById("re-send").innerText = '发送成功';
+			}else if(sec > 0){
+				document.getElementById("re-send").innerText = sec+"秒后重新发送";
+			}else{
+				clearInterval(timer);
+				sec = 120;
+				$("#resend").hide();
+				$("#get-code").show();
+			}
+		}
+		function fast_submit(){
+			var mobile = document.getElementById("mobile").value;
+			var code = document.getElementById("code").value;
+			var callback = document.getElementById("callback").value;
+			var appId = document.getElementById("appId").value;
+			if(mobile == ''){
+				msg(1,'手机号不能为空！');
+				return false;
+			}else if(!(/^1(3|4|5|7|8)\d{9}$/.test(mobile))){
+				msg(1,'请填写正确的手机号！');
+				return true;
+			}
+			if(code == ''){
+				msg(1,'验证码不能为空！');
+				return false;
+			}
+			$.post("fast_login",{mobile,code,callback,appId},function(data){
+				if(data.status == 1){
+					var info = data.data;
+					document.getElementById("signature").value = info.signature;
+					document.getElementById("nonce").value = info.nonce;
+					document.getElementById("timestamp").value = info.timestamp;
+					document.getElementById("ticket").value = info.id;
+					document.getElementById("create_at").value = info.create_at;
+					document.getElementById("check_at").value = info.check_at;
+					document.getElementById("expire_time").value = info.expire_time;
+					document.getElementById("user").value = info.user;
+					$("#redirect-form").attr("action",info.url);
+					$("#redirect-form").submit();
+				}else if(data.status == 5){
+					$(".reg-form").hide();
+					if(data.data){
+						document.getElementById("email").value = data.data;
+					}
+					$("#tip-img").attr("src",'/Public/img/swal2-info.png');
+					document.getElementById("tip-msg").innerText = data.info;
+					$(".tip").show();
+					$(".send-success").hide();
+					$(".send-fail").hide();
+					$(".send-mail").show();
+					$("#email").focus();
+				}else{
+					msg(1,data.info);
+					return false;
+				}
+			});
+		}
+		function common_submit(){
 			var username = document.getElementById("username").value;
 			var password = document.getElementById("password").value;
 			var callback = document.getElementById("callback").value;
 			var appId = document.getElementById("appId").value;
-			$.post("/index.php/Home/Server/login",{username,password,callback,appId},function(data){
-				if(data.status != 1){
-					var info = data.info;
-					document.getElementById("msg").innerText = info;
-					$(".msg").show();
+			if(username == ''){
+				msg(1,'用户名不能为空！');
+				return false;
+			}
+			if(code == ''){
+				msg(1,'验证码不能为空！');
+				return false;
+			}
+			$.post("common_login",{username,password,callback,appId},function(data){
+				if(data.status == 1){
+					var info = data.data;
+					document.getElementById("signature").value = info.signature;
+					document.getElementById("nonce").value = info.nonce;
+					document.getElementById("timestamp").value = info.timestamp;
+					document.getElementById("ticket").value = info.id;
+					document.getElementById("create_at").value = info.create_at;
+					document.getElementById("check_at").value = info.check_at;
+					document.getElementById("expire_time").value = info.expire_time;
+					document.getElementById("user").value = info.user;
+					$("#redirect-form").attr("action",info.url);
+					$("#redirect-form").submit();
+				}else if(data.status == 5){
+					$(".reg-form").hide();
+					if(data.data){
+						document.getElementById("email").value = data.data;
+					}
+					$("#tip-img").attr("src",'/Public/img/swal2-info.png');
+					document.getElementById("tip-msg").innerText = data.info;
+					$(".tip").show();
+					$(".send-success").hide();
+					$(".send-fail").hide();
+					$(".send-mail").show();
+					$("#email").focus();
+				}else{
+					msg(1,data.info);
+					return false;
 				}
 			});
+		}
+		function back(){
+			$(".reg-form").show();
+			$(".fast-form").hide();
+			$(".msg").hide();
+			$(".tip").hide();
+		}
+		function send_mail(){
+			var email = document.getElementById("email").value;
+			var filter  = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+			if(email == ''){
+				msg(1,'电子邮箱不能为空！');
+				return false;
+			}else if(!(filter.test(email))){
+				msg(1,'请填写正确的电子邮箱！');
+				return false;
+			}
+			$.post("activate",{email},function(data){
+				if(data.status == 1){
+					$(".reg-form").hide();
+					$("#tip-img").attr("src",'/Public/img/swal2-success2.png');
+					document.getElementById("tip-msg").innerText = data.info;
+					$(".tip").show();
+					$(".send-fail").hide();
+					$(".send-mail").hide();
+					$(".send-success").show();
+				}else{
+					$(".reg-form").hide();
+					$("#tip-img").attr("src",'/Public/img/swal2-error.png');
+					document.getElementById("tip-msg").innerText = data.info;
+					$(".tip").show();
+					$(".send-success").hide();
+					$(".send-mail").hide();
+					$(".send-fail").show();
+				}
+			});
+		}
+		function toMailCenter(){
+			var email = document.getElementById("email").value;
+			var pos = email.indexOf("@");
+			var url = "http://www."+email.substr(pos+1);
+			window.location.href=url;
 		}
 	</script>
 </head>
@@ -60,48 +253,69 @@
           
           </div>
 	    </div>
-	    <div class="row margin">
+	    <div class="row margin common-form reg-form">
           <div class="input-field col s12">
             <i class="mdi-social-person-outline prefix"></i>
             <input class="validate" name="username" id="username" type="text">
             <label for="username" class="">用户名/邮箱/手机号</label> <!-- data-error="wrong" data-success="right" -->
           </div>
 	    </div>
-        <div class="row margin">
+        <div class="row margin common-form  reg-form">
           <div class="input-field col s12">
             <i class="mdi-action-lock-outline prefix"></i>
             <input name="password" id="password" type="password">
             <label for="password">密码</label>
           </div>
         </div>
-        <div class="row msg">          
-          <div class="input-field col s12 m12 l12  login-text">
+        <div class="row margin fast-form  reg-form">
+          <div class="input-field col s12">
+            <i class="mdi-social-mobile-outline prefix"></i>
+            <input class="validate" id="mobile" name="mobile" type="text">
+            <label for="mobile" class="">手机号码</label> <!-- center-align -->
+            <button type="button" class="get-code" id="get-code" onclick="send_code();">获取验证码</button>
+            <button type="button" class="resend" id="resend" style="display:none;"><span id="re-send"></span></button>
+          </div>
+        </div>
+        <div class="row margin fast-form  reg-form">
+          <div class="input-field col s12">
+            <i class="mdi-social-code-outline prefix"></i>
+            <input class="validate" id="code" name="code" type="text">
+            <label for="code" class="">验证码</label> <!-- center-align -->
+          </div>
+        </div>
+        <div class="row msg  reg-form">          
+          <div class="input-field col s12 m12 l12 login-text">
               <span id="msg"></span>
           </div>
         </div>
-        <!-- <div class="row">          
-          <div class="input-field col s12 m12 l12  login-text">
-              <input type="checkbox" id="remember-me" />
-              <label for="remember-me">记住我</label>
+        <div class="row common-form  reg-form">
+          <div class="input-field col s6 m6 l6">
+            <a href="javascript:void(0);" class="second_btn waves-effect waves-light col s12" onclick="fast_login();">手机快捷登录</a>
           </div>
-        </div> -->
-        <div class="row">
-          <div class="input-field col s12">
-            <a href="javascript:void(0);" onclick="login();" class="btn waves-effect waves-light col s12">登　录</a>
+          <div class="input-field col s6 m6 l6">
+          	<a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="common_submit();">登　录</a>
           </div>
         </div>
-        <div class="rows">
+        <div class="row fast-form  reg-form">
           <div class="input-field col s6 m6 l6">
-            <p class="margin medium-small"><a href="{:U('Home/Server/register')}">现在注册!</a></p>
+            <a href="javascript:void(0);" class="second_btn waves-effect waves-light col s12" onclick="common_login();">传统登录</a>
           </div>
           <div class="input-field col s6 m6 l6">
-            <p class="margin right-align medium-small"><a href="{:U('Home/Server/forgot_password')}">忘记密码?</a></p>
+          	<a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="fast_submit();">登　录</a>
+          </div>
+        </div>
+        <div class="rows  reg-form">
+          <div class="input-field col s6 m6 l6">
+            <p class="margin medium-small"><a href="{:U('Home/Server/register')}?appId={$appId}&callback={$callback}">现在注册!</a></p>
+          </div>
+          <div class="input-field col s6 m6 l6">
+            <p class="margin right-align medium-small"><a href="{:U('Home/Server/forgot_password')}?appId={$appId}&callback={$callback}">忘记密码?</a></p>
           </div>          
         </div>
-        <div class="row group">
+        <div class="row group  reg-form">
 			 <div class="tagline"><span>第三方登录</span></div><!-- .tagline -->
 		</div>
-		<div class="row group">
+		<div class="row group  reg-form">
 		  <div class="col span_12_of_12 center">
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/weixin.png"></a>
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/68-sina-weibo.png" ></a>
@@ -112,8 +326,49 @@
 			<a href="#"><img class="third-icon" src="__PUBLIC__/img/dianping.png" ></a>
 		  </div>
 		</div>
-		<input type="hidden" name="callback" id="callback" value="{$callback}">
 		<input type="hidden" name="appId" id="appId" value="{$appId}">
+		<div class="row tip">
+		  <div class="input-field col s12 center">
+	        <img src="__PUBLIC__/img/swal2-success2.png" id="tip-img">
+	        <h4 id="tip-msg"></h4>
+	      </div>
+	      <div class="input-field col s12 send-mail">
+            <i class="mdi-social-email-outline prefix"></i>
+            <input class="validate" id="email" type="email">
+            <label for="email" class="">电子邮箱</label> <!-- center-align -->
+	      </div>
+	      <div class="input-field col s6 m6 l6 send-mail">
+		  	<a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="back();">返　回</a>
+		  </div>
+		  <div class="input-field col s6 m6 l6 send-mail">
+	        <a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="send_mail();">发送激活邮件</a>
+		  </div>
+		  <div class="input-field col s6 m6 l6 send-success">
+		  	<a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="back();">返　回</a>
+		  </div>
+		  <div class="input-field col s6 m6 l6 send-success">
+		  	<a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="toMailCenter();">登录邮箱</a>
+		  </div>
+		  <div class="input-field col s6 m6 l6 send-fail">
+	        <a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="back();">返　回</a>
+		  </div>
+		  <div class="input-field col s6 m6 l6 send-fail">
+	        <a href="javascript:void(0);" class="btn waves-effect waves-light col s12" onclick="send_mail();">重新发送</a>
+		  </div>
+		</div>
+	  </form>
+	</div>
+	<div>
+	  <form id="redirect-form" action="#" method="post">
+	  	<input type="hidden" name="signature" id="signature" value="">
+	  	<input type="hidden" name="nonce" id="nonce" value="">
+	  	<input type="hidden" name="timestamp" id="timestamp" value="">
+	  	<input type="hidden" name="ticket" id="ticket" value="">
+	  	<input type="hidden" name="create_at" id="create_at" value="">
+	  	<input type="hidden" name="check_at" id="check_at" value="">
+	  	<input type="hidden" name="expire_time" id="expire_time" value="">
+	  	<input type="hidden" name="user" id="user" value="">
+	  	<input type="hidden" name="callback" id="callback" value="{$callback}">
 	  </form>
 	</div>
   </div>
