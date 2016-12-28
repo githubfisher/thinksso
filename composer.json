@@ -1,7 +1,12 @@
 {
     "name": "githubfisher/thinksso",
-    "description": "thinkphp user center",
-    "keywords": ["SSO","thinkphp","usercenter"],
+    "description": "user center by thinkphp",
+    "keywords": [
+        "SSO",
+        "thinkphp",
+        "ucenter"
+    ],
+    "type": "library",
     "license": "MIT",
     "authors": [
         {
