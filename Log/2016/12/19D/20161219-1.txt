@@ -1,2 +1,0 @@
-2016-12-19 15:28:53 查询SQL:SELECT `id`,`username`,`nickname` FROM `user` WHERE `username` = '123' AND `password` = '456' LIMIT 1   
-2016-12-19 15:28:53 查询SQL:SELECT `id`,`username`,`nickname` FROM `user` WHERE `username` = null AND `password` = null LIMIT 1   
