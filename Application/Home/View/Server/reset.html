@@ -63,7 +63,6 @@
 			}
 			var name = document.getElementById("name").value;
 			var pwd = document.getElementById("password1").value;
-			alert(name+","+pwd);
 			$.post("reset_pwd",{name,pwd},function(data){
 				if(data.status == 1){
 					$(".reg-form").hide();
