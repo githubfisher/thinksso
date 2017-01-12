@@ -155,7 +155,7 @@ class Server
 	public function toLogin($callback,$appId)
 	{
 		// $signature = 
-		$loginUrl = $this->_config['loginView'].$this->signature().'&appId='.$appId.'&callback='.$callback;
+		$loginUrl = C('base_url').$this->_config['loginView'].$this->signature().'&appId='.$appId.'&callback='.$callback;
 		header('Location:'.$loginUrl);
 	}
 
