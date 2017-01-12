@@ -49,10 +49,10 @@ class ServerController extends Controller {
                 if($user['password'] == md5($password.$user['rand'])){
                     $this->server->login($user,$callback,$appId);
                 }else{
-                    $this->server->toLogin($callback,$appId);
+                    $this->toLogin($callback,$appId);
                 }
             }else{
-                $this->server->toLogin($callback,$appId);
+                $this->toLogin($callback,$appId);
             } 
         }else if($mobile && $code){
             $checkCode = $this->getCode();
@@ -62,14 +62,25 @@ class ServerController extends Controller {
                 if($user){
                     $this->server->login($user,$callback,$appId);
                 }else{
-                    $this->server->toLogin($callback,$appId);
+                    $this->toLogin($callback,$appId);
                 }
             }else{
-               $this->server->toLogin($callback,$appId);
+               $this->toLogin($callback,$appId);
             }
         }else{
-            $this->server->toLogin($callback,$appId);
+            $this->toLogin($callback,$appId);
         }
+    }
+    /*
+     * Redirect to Login Page
+     * @return redirect
+     */
+    private function toLogin($callback,$appId)
+    {
+        $signature = $this->server->makeSignature();
+        $signature['appId'] = $appId;
+        $signature['callback'] = $callback;
+        $this->redirect("Home/Server/index",$signature);
     }
     /*
      * Check mobile and code
